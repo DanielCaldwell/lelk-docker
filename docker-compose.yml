@@ -20,7 +20,7 @@ logstashforwarderdata:
     hostname: logstashforwarderdata
 
 loggeneratordata:
-    build: ./loggenerator_data/.
+    build: ./loggenerator/data-container/.
     hostname: loggenerator
     command: ls
 
