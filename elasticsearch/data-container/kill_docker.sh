@@ -1,0 +1,2 @@
+docker kill ac_elasticsearch_data
+docker rm ac_elasticsearch_data

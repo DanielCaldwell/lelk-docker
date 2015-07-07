@@ -1,0 +1,17 @@
+logstashdata:
+    build: ./data-container/.
+    hostname: logstashdata
+    command: ls -laRh /opt
+
+logstash:
+    image: ./run-container/.
+    volumes_from:
+        - logstashdata
+    ports:
+        - "514:514"
+        - "5043:5043"
+        - "9292:9292"
+    restart: always
+    hostname: logstash
+    command: /opt/logstash/bin/logstash agent -f "/opt/conf/logstash.conf" --verbose -l "/opt/logs/logstash.log"
+

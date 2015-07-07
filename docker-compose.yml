@@ -1,0 +1,76 @@
+elasticsearchdata:
+    build: ./elasticsearch/data-container/. 
+    volumes: 
+        - /usr/share/elasticsearch/data
+    hostname: elasticsearchdata
+    command: ls
+
+logstashdata:
+    build: ./logstash/data-container/.
+    hostname: logstashdata
+    command: ls -lah /opt
+
+kibanadata:
+    build: ./kibana/data-container/.
+    hostname: kibanadata
+    command: ls
+
+logstashforwarderdata:
+    build: ./logstash_forwarder/data-container/.
+    hostname: logstashforwarderdata
+
+loggeneratordata:
+    build: ./loggenerator_data/.
+    hostname: loggenerator
+    command: ls
+
+
+elasticsearch:
+    build: ./elasticsearch/run-container/. 
+    volumes_from:
+        - elasticsearchdata
+    ports:
+        - "9200:9200"
+        - "9300:9300"
+    restart: always
+    hostname: elasticsearch
+
+logstash:
+    build: ./logstash/run-container/.
+    links: 
+        - elasticsearch:elasticsearch
+    volumes_from:
+        - logstashdata
+    ports:
+        - "514:514"
+        - "5043:5043"
+        - "9292:9292"
+    restart: always
+    hostname: logstash
+    command: /opt/logstash/bin/logstash agent -f "/opt/conf/logstash.conf" --verbose -l "/opt/logs/logstash.log"
+
+
+kibana:
+    build: ./kibana/run-container/.
+    links:
+        - elasticsearch
+    volumes_from:
+        - kibanadata
+    ports:
+        - "5601:5601"
+    restart: always
+    hostname: kibana
+    command: kibana --config /opt/kibana/config/kibana.yml
+
+
+logstashforwarder:
+    build: ./logstash_forwarder/run-container/.
+    volumes_from: 
+        - logstashdata
+        - logstashforwarderdata
+        - loggeneratordata
+        - elasticsearchdata
+    links:
+        - logstash:logstash
+    hostname: logstashforwarder
+
